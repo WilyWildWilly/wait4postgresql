@@ -21,7 +21,7 @@ Test this in your own environment by stopping the postgres service (`sudo servic
 
 ## mod, adapt, customize
 
-On line 10 you can see the following assignment: `b=$(netstat -tulpn 2>/dev/null | grep 5432)`
+On line 10 you can see the following assignment: `b=$(netstat -tulpn 2>/dev/null | grep 5432)`. Port 5432 is the default port for PostgreSQL, with which I was working when I had the issue that made me look for a solution to this problem.
 Changing the `5432` to any other port number can help you if:
  - you're using a different DB engine (it would be 27017 for MongoDB or 3306 for MySQL or MariaDB)
  - you're using a customized port configuration for your containers
