@@ -1,10 +1,11 @@
 # wait4postgresql
 
-A bash script that waits for a process to listen on port 5432 and exits. Thought as a step to run in a Dockerfile for docker compose to wait for the db container to be operating before continuing
+A bash script that waits for a process to listen on port 5432 and exits. Thought as a step to run in a Dockerfile for the back-end to wait for the db container to be operating before continuing with the creation, seeding or migration of its database. 
 
 ## instructions
 
-Run this with your own user (no sudo needed). It needs `chown +x wait4postgresql.sh` authorisation in order to run.
+Copy the file in the directory you intend to make available to your container and write run instructions in the dockerfile, or see below how to generate this file directly on build.
+Run this with your own user (no sudo needed). It needs `chown +x wait4postgresql.sh` authorisation in order to run though.
 
 ## the issue
 
@@ -24,3 +25,35 @@ On line 10 you can see the following assignment: `b=$(netstat -tulpn 2>/dev/null
 Changing the `5432` to any other port number can help you if:
  - you're using a different DB engine (it would be 27017 for MongoDB or 3306 for MySQL or MariaDB)
  - you're using a customized port configuration for your containers
+
+## in-docker implementation
+
+If you don't want to add a file, you can generate the script directly on container build by adding the following lines right before the authorisation and run commands. Here's how:
+
+``` 
+RUN touch wait4postgres.sh && echo "#!/bin/bash" >> wait4postgres.sh
+RUN echo "a=0" >> wait4postgres.sh
+RUN echo "t=0" >> wait4postgres.sh
+RUN echo "while ((a < 1))" >> wait4postgres.sh
+RUN echo "\tdo" >> wait4postgres.sh
+RUN echo "t=\$(( t + 1 ))" >> wait4postgres.sh
+RUN echo "\t echo -ne \"No process on port 5432, waiting \$t s for postgresql...\\r\"" >> wait4postgres.sh
+RUN echo "\t echo -ne \"\\b\\b\"" >> wait4postgres.sh
+RUN echo "\tsleep 1s" >> wait4postgres.sh
+RUN echo "\tb=\$(netstat -tulpn | grep 5432)" >> wait4postgres.sh
+RUN echo "\tif [ ! -z \"\$b\" ]" >> wait4postgres.sh
+RUN echo "\tthen" >> wait4postgres.sh
+RUN echo "\t\ta=$(( a + 1 ))" >> wait4postgres.sh
+RUN echo "\t\techo \"A process is listening on 5432, presuming postgresql\"" >> wait4postgres.sh
+RUN echo "\t\texit 0" >> wait4postgres.sh
+RUN echo "\tfi" >> wait4postgres.sh
+RUN echo "done" >> wait4postgres.sh
+RUN chmod +x wait4postgres.sh
+# wait for the db container:
+# RUN sudo ./wait4postgres.sh && rm -f wait4postgres.sh
+```
+(The last line will also delete the file after the execution to eliminate unnecessary scripts littering your container).
+
+## the idea
+
+I had this idea after incurring in complications trying to use vishnubob's excellent wait-for-it (https://github.com/vishnubob/wait-for-it.git), which is a much more complete solution. I hope mine is more noob-friendly ;)
