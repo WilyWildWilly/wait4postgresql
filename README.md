@@ -26,9 +26,9 @@ Changing the `5432` to any other port number can help you if:
  - you're using a different DB engine (it would be 27017 for MongoDB or 3306 for MySQL or MariaDB)
  - you're using a customized port configuration for your containers
 
-## in-docker implementation
+## in-docker generation
 
-If you don't want to add a file, you can generate the script directly on container build by adding the following lines right before the authorisation and run commands. Here's how:
+If you don't want to add a file, you can generate the script directly on container build by adding the following lines right before the backend's db creation and migration commands. Here's how:
 
 ``` 
 RUN touch wait4postgres.sh && echo "#!/bin/bash" >> wait4postgres.sh
@@ -56,4 +56,4 @@ RUN chmod +x wait4postgres.sh
 
 ## the idea
 
-I had this idea after incurring in complications trying to use vishnubob's excellent wait-for-it (https://github.com/vishnubob/wait-for-it.git), which is a much more complete solution. I hope mine is more noob-friendly ;)
+I had this idea after incurring in complications trying to use vishnubob's excellent wait-for-it (https://github.com/vishnubob/wait-for-it.git), which is a much more complete solution covering a much broader variety of needs, and is maybe not really thought for this use case (although it can probably do in expert hands). This is intended to be more noob-friendly ;)
